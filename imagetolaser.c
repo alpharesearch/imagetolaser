@@ -8,7 +8,7 @@
 static int verbose_flag = 0;	// Set by verbose flag.
 
 double tool_radius = 0.1;	// mm. radius of laser.
-double stepover = 0.2;
+double stepover = 0.5;
 double max_cut = 255;		// mm. Max plunge depth.
 double zscale = 255;              // mm. Depth of image.
 double max_error = 0.001;	// mm
@@ -50,7 +50,33 @@ projection_error(double x, double y, double z)
 void
 do_route_to(double x, double y, double z)
 {
-  printf("G1 X%.2f Y%.2f S%.0f\n", x, y, z*-1);
+  static double last_x, last_x_print; 
+  static double last_y; 
+  static double last_z;
+  
+  if((int)last_z == (int)z && last_y == y) 
+  {
+
+  }
+  else
+  {
+	  if(last_x_print != last_x){
+	  printf("G1");
+	  printf("X%.2f", last_x);
+	  printf("S%.0f",last_z*-1);
+	  printf("\n");
+	  last_x_print = last_x;
+	}
+  }
+  if((last_x != x || last_y != y) && !((int) last_z == (int)z && last_y == y)) printf("G1");
+  if(last_x != x && !((int) last_z == (int)z && last_y == y)) {printf("X%.2f", x); last_x_print = x;}
+  if(last_y != y) printf("Y%.2f", y);
+  if((int)last_z != (int)z) printf("S%.0f",z*-1);
+  if(!((int) last_z == (int)z && last_y == y)) printf("\n");
+  
+  last_x = x;
+  last_y = y;
+  last_z = z;
   mx = x;
   my = y;
   mz = z;
@@ -96,7 +122,7 @@ void
 move_to(double x, double y, double z)
 {
   finish();
-  printf("G0 X%.2f Y%.2f\nM3 S0\nF1000\n", x, y);
+  printf("G0 X%.2f Y%.2f\nM3 S0\nF400\n", x, y);
   mx = x;
   my = y;
   mz = z;
